@@ -1,0 +1,70 @@
+apply plugin: 'liberty'
+apply plugin: 'war'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.6.5'
+    }
+}
+
+ext {
+    httpPort = 8083
+    httpsPort = 8275
+    appUrl = "http://localhost:${httpPort}/ai-bike"
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+  providedCompile group: 'org.eclipse.microprofile', name: 'microprofile', version: '3.0'
+  providedCompile group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '8.0.0'
+  testCompile group: 'junit', name: 'junit', version: '4.12'
+  testCompile group: 'org.eclipse', name: 'yasson', version: '1.0.5'
+  libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '[19.0.0.9,)'
+}
+    eclipse {
+	    classpath {
+	        defaultOutputDir =  file('build/classes/java/main')
+	        file {
+	            whenMerged {
+	                entries.findAll { it.path.startsWith('src/main') }
+	                       .each { it.output = "build/classes/java/main" }
+	            }
+	        }
+	    }
+	  }
+
+liberty {
+    server {
+        name = "ai-service"
+        dropins = [war]
+        bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
+    }
+}
+clean.dependsOn 'libertyStop'
+libertyDebug.dependsOn 'libertyStop'    
+libertyStart.dependsOn 'libertyStop', 'test'
+libertyRun.dependsOn   'libertyStop'
+
+task debug { dependsOn 'libertyDebug' }
+task start { dependsOn 'libertyStart' }
+task stop  { dependsOn 'libertyStop'  }
+
+libertyStart.doLast {
+    println "Application available at: ${appUrl}"
+}
+
+task open {
+    shouldRunAfter 'libertyStart'
+    doLast {
+        java.awt.Desktop.desktop.browse "${appUrl}".toURI()
+    }
+}
+

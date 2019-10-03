@@ -1,0 +1,13 @@
+build
+/.apt_generated/
+**/.project
+**/.gradle/
+**/.DS_Store
+.vscode
+/*/bin/
+/*/build/
+/*/.project
+.classpath
+.settings/
+!org.eclipse.jdt.core.prefs
+!org.eclipse.jdt.ui.prefs
