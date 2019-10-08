@@ -7,6 +7,7 @@ build
 /*/bin/
 /*/build/
 /*/.project
+/*/server.env
 .classpath
 .settings/
 !org.eclipse.jdt.core.prefs

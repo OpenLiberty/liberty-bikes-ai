@@ -6,6 +6,7 @@ package org.libertybikes.ai.service;
 import java.io.IOException;
 import java.net.URI;
 
+import javax.inject.Inject;
 import javax.websocket.ClientEndpoint;
 import javax.websocket.ContainerProvider;
 import javax.websocket.OnClose;
@@ -16,12 +17,12 @@ import javax.websocket.WebSocketContainer;
 
 import org.libertybikes.ai.AIClass;
 
-// how to join a game: http://localhost:8083/ai-service/open/join/{partyID}
 
 @ClientEndpoint
 public class AIWebSocket {
 
     private static String uri = "ws://localhost:8080/round/ws/";
+    
 
     public Session session;
 
@@ -32,8 +33,8 @@ public class AIWebSocket {
     AIClass AI;
 
     public AIWebSocket(String roundId) {
-        System.out.println("Initializing WebSocket with round " + roundId);
         String key = "";
+        System.out.println("Initializing WebSocket with round " + roundId + " and key " + key);
 
         try {
             URI endpointURI = new URI(uri + roundId);
