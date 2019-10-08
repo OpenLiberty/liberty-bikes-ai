@@ -21,12 +21,12 @@ public class AIRoundService {
     GameServiceClient client;
 
     @GET
-    @Path("/join/{partyId}")
-    public String joinSession(@PathParam("partyId") String partyId) {
-        System.out.println("Trying to join " + partyId + " party.");
+    @Path("/join")
+    public String joinSession() {
+        System.out.println("Trying to join party.");
 
         // get party's current round
-        String roundId = client.getRoundId(partyId);
+        String roundId = client.getAvailableRounds();
 
         // open a websocket and join it.
         AIWebSocket socket = new AIWebSocket(roundId);
