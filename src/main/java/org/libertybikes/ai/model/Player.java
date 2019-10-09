@@ -1,13 +1,12 @@
-/**
- * Represents the information associated with each player in Liberty-Bikes
- */
 package org.libertybikes.ai.model;
 
-import org.libertybikes.ai.service.AIWebSocket.DIRECTION;
+import org.libertybikes.ai.AILogic.DIRECTION;
 
-public class Player { 	
+/**
+ * Represents the information associated with each player in Liberty Bikes
+ */
+public class Player {
     public String id;
-    public String color;
     public String status;
     public boolean alive;
     public int x;

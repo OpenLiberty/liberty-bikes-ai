@@ -13,7 +13,6 @@ buildscript {
 ext {
     httpPort = 8083
     httpsPort = 8275
-    appUrl = "http://localhost:${httpPort}/ai-bike"
 }
 
 sourceCompatibility = 1.8
@@ -56,15 +55,4 @@ libertyRun.dependsOn   'libertyStop'
 task debug { dependsOn 'libertyDebug' }
 task start { dependsOn 'libertyStart' }
 task stop  { dependsOn 'libertyStop'  }
-
-libertyStart.doLast {
-    println "Application available at: ${appUrl}"
-}
-
-task open {
-    shouldRunAfter 'libertyStart'
-    doLast {
-        java.awt.Desktop.desktop.browse "${appUrl}".toURI()
-    }
-}
 
