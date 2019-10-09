@@ -2,6 +2,8 @@ package org.libertybikes.ai.service;
 
 import java.io.IOException;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import javax.websocket.ClientEndpoint;
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
@@ -11,6 +13,7 @@ import javax.websocket.Session;
 
 import org.libertybikes.ai.AILogic;
 import org.libertybikes.ai.AILogic.DIRECTION;
+import org.libertybikes.ai.model.GameTick;
 
 /**
  * This class represents a WebSocket that will be opened up between this AI service and a
@@ -21,6 +24,8 @@ import org.libertybikes.ai.AILogic.DIRECTION;
  */
 @ClientEndpoint
 public class AIWebSocket {
+
+    private static final Jsonb jsonb = JsonbBuilder.create();
 
     private final AIConfiguration config;
     private final RegistrationBean registration;
@@ -39,7 +44,7 @@ public class AIWebSocket {
         this.session = session;
         String dataai = "{\"playerjoined\":\"" + config.getPlayerId() + "\"}";
         sendMessage(dataai);
-        aiLogic = new AILogic();
+        aiLogic = new AILogic(config.getPlayerId());
     }
 
     @OnClose
@@ -50,17 +55,26 @@ public class AIWebSocket {
     // Every game tick, we recieve a message back listing each object on the game board and their location
     @OnMessage
     public void onMessage(Session session, String message) throws IOException {
-        if ("{\"gameStatus\":\"FINISHED\"}".equals(message)) {
-            // TODO: handle this more elegantly than .equals()
-            // game over, requeue
-            session.close();
-            registration.joinRound();
-        } else {
-            DIRECTION newDirection = aiLogic.processAiMove(message);
-            if (newDirection != currentDirection) {
-                currentDirection = newDirection;
-                sendDirection(currentDirection);
+        System.out.println("got msg: " + message);
+        try {
+            if ("{\"gameStatus\":\"FINISHED\"}".equals(message)) {
+                // TODO: handle this more elegantly than .equals()
+                // game over, requeue
+                session.close();
+                registration.joinRound();
+            } else {
+                // use jsonb to convert from String --> POJO and more easily made decisions on where to move
+                GameTick gameTick = jsonb.fromJson(message, GameTick.class);
+                if (gameTick.isValid()) {
+                    DIRECTION newDirection = aiLogic.processAiMove(gameTick);
+                    if (newDirection != currentDirection) {
+                        currentDirection = newDirection;
+                        sendDirection(currentDirection);
+                    }
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -84,9 +98,9 @@ public class AIWebSocket {
 
     public void sendMessage(String message) {
         try {
-            this.session.getBasicRemote().sendText(message);
+            session.getBasicRemote().sendText(message);
             System.out.println("Sent message: " + message);
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println("Failed to send message: " + message);
             e.printStackTrace();
         }

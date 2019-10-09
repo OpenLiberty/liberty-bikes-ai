@@ -19,7 +19,7 @@ public class AIConfiguration {
 
     /**
      * After you go to the instance of Liberty-Bikes running and register your bot
-     * you will stick your key here, we will then send this key back as we join a game.
+     * you will stick your key in src/main/resources/META-INF/microprofile-config.properties
      */
     @Inject
     @ConfigProperty(name = "player_key")
