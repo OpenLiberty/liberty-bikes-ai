@@ -1,5 +1,5 @@
 /**
- *
+ * Represents the information associated with each obstacle in Liberty-Bikes
  */
 package org.libertybikes.ai.model;
 

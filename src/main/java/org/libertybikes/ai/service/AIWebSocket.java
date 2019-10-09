@@ -1,5 +1,9 @@
 /**
- *
+ * This class represents a WebSocket that will be opened up between this liberty-bikes-ai service
+ * and a GameRoundWebsocket from a running Liberty Bikes game-service. After a connection is sucessfully
+ * established, the @OnMessage methos will recieve messages every game tick with an update on the state
+ * of the game. This websocket can send messages back to the game-service to tell it to update the direction
+ * of the bike being controlled by this service.
  */
 package org.libertybikes.ai.service;
 
@@ -20,20 +24,28 @@ import org.libertybikes.ai.AIClass;
 
 @ClientEndpoint
 public class AIWebSocket {
-
+	/**
+	 * After you go to the instance of Liberty-Bikes running and register your bot
+	 * you will stick your key here, we will then send this key back as we join a game.
+	 */
+	String key = "";
+	/**
+	 * The Uri of the instance of Liberty-Bikes you are joining, it is currently pointed
+	 * at the default location for a locally ran instance but this will need to be changed
+	 * to a public Uri once we get to that point of the lab where you are joining the lab
+	 * host's Liberty-Bikes instance.
+	 */
     private static String uri = "ws://localhost:8080/round/ws/";
     
+    public enum DIRECTION {
+        UP, DOWN, LEFT, RIGHT
+    };	
 
     public Session session;
 
-    public enum DIRECTION {
-        UP, DOWN, LEFT, RIGHT
-    };
-
     AIClass AI;
 
-    public AIWebSocket(String roundId) {
-        String key = "";
+    public AIWebSocket(String roundId) {     
         System.out.println("Initializing WebSocket with round " + roundId + " and key " + key);
 
         try {
@@ -64,11 +76,14 @@ public class AIWebSocket {
         System.out.println("Close Websocket");
     }
 
+    // Every game tick, we recieve a message back listing each object on the game board and their location
     @OnMessage
     public void onMessage(Session session, String message) throws IOException {
+    	//System.out.println("Recieved Message: " + message);
         AI.processAiMove(message);
     }
 
+    // Sends a message representing a direction to tell the game-service what way to turn your bike
     public void sendDirection(DIRECTION dir) {
         switch (dir) {
             case RIGHT:
