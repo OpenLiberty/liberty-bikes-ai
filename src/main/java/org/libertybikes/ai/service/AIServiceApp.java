@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.libertybikes.ai.service;
 
 import javax.ws.rs.ApplicationPath;
