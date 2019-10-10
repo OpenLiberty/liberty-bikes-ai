@@ -35,6 +35,9 @@ public class RegistrationBean {
 
     public void joinRound() {
         System.out.println("Attempting to register with game service...");
+        
+        // TODO: use MPRestClient to pull the valid partyID from the game service
+        String partyId = "";
 
         // MP Rest Client doesn't yet support JAX-RS server-sent-events, so we nee to do this manually
         // enhancement tracked at: https://github.com/eclipse/microprofile-rest-client/issues/11
