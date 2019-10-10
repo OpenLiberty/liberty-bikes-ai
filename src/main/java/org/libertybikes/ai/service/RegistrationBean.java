@@ -31,7 +31,6 @@ public class RegistrationBean {
     AIConfiguration config;
 
     @Inject
-    @RestClient
     GameServiceClient gameService;
 
     public void joinRound() {
