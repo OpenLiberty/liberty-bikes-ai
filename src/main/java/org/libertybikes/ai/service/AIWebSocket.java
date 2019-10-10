@@ -13,7 +13,6 @@ import javax.websocket.Session;
 
 import org.libertybikes.ai.AILogic;
 import org.libertybikes.ai.AILogic.DIRECTION;
-import org.libertybikes.ai.model.GameTick;
 
 /**
  * This class represents a WebSocket that will be opened up between this AI service and a
@@ -63,15 +62,7 @@ public class AIWebSocket {
                 session.close();
                 registration.joinRound();
             } else {
-                // use jsonb to convert from String --> POJO and more easily made decisions on where to move
-                GameTick gameTick = jsonb.fromJson(message, GameTick.class);
-                if (gameTick.isValid()) {
-                    DIRECTION newDirection = aiLogic.processAiMove(gameTick);
-                    if (newDirection != currentDirection) {
-                        currentDirection = newDirection;
-                        sendDirection(currentDirection);
-                    }
-                }
+                // use jsonb to convert from String --> POJO
             }
         } catch (Exception e) {
             e.printStackTrace();

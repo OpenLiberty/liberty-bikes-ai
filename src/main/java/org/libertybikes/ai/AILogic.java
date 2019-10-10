@@ -69,11 +69,8 @@ public class AILogic {
             type = GAME_SLOT.PLAYER;
         else if (o instanceof MovingObstacle)
             type = GAME_SLOT.MOVING_OBSTACLE;
-        for (int w = 0; w < o.width; w++) {
-            for (int h = 0; h < o.height; h++) {
-                gameBoard[o.x + w][o.y + h] = type;
-            }
-        }
+
+        // fill in gameBoard with the obstacle type
     }
 
     /**
