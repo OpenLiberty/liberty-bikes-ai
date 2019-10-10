@@ -4,7 +4,6 @@ import java.net.URI;
 import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.annotation.JsonbProperty;
@@ -15,7 +14,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.sse.InboundSseEvent;
 import javax.ws.rs.sse.SseEventSource;
 
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.ai.restclient.GameServiceClient;
 
 /**
@@ -27,15 +25,13 @@ public class RegistrationBean {
 
     private static final Jsonb jsonb = JsonbBuilder.create();
 
-    @Inject
     AIConfiguration config;
 
-    @Inject
     GameServiceClient gameService;
 
     public void joinRound() {
         System.out.println("Attempting to register with game service...");
-        
+
         // TODO: use MPRestClient to pull the valid partyID from the game service
         String partyId = "";
 
