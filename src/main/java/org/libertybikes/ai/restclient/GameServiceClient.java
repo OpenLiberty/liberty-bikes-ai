@@ -16,8 +16,4 @@ import org.libertybikes.ai.service.AIConfiguration;
  * but can be overridden with externalized configuration via MP Config to point to a
  * remote game-service instance.
  */
-public interface GameServiceClient {
-
-    public Map<String, Object> describe();
-
-}
+public interface GameServiceClient {}
