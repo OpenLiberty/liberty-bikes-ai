@@ -121,7 +121,7 @@ Leave this log file open for duration of this lab -- you will be referring to it
 
 
 ## Hot code updates with OpenLiberty
-A very nice feature of OpenLiberty is that for local development you don't need to restart your server or even redeploy your app between code changes. If you are using an IDE that compiles the app for you, the IDE recompiling the app will detected by Liberty and it will automatically restart the app with the new code.
+A very nice feature of OpenLiberty is that for local development you don't need to restart your server or even redeploy your app between code changes. If you are using an IDE that compiles the app for you, the IDE recompiling the app will be detected by Liberty and it will automatically restart the app with the new code.
 To test this out, go to the `org.libertybikes.ai.service.StartupProcedure` class and make any code change you like (as long as it compiles).
 Once you save the code change and your IDE recompiles the app, refresh your messages.log file and you will see the app updated automatically in a few milliseconds:
 
