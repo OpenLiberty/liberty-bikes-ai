@@ -9,16 +9,13 @@ Normally Liberty Bikes is played by a human looking at the screen and manually c
 
 # 0) Prereqs
 
-
 Required software:
 - Have Java 8 or 11 installed
 - Have git installed
 - Your preferred code editor
 
-
 Fork and clone the liberty-bikes repository at:
 https://github.com/OpenLiberty/liberty-bikes
-
 
 Start up the Liberty Bikes core services by running the commands:
 
@@ -36,19 +33,19 @@ https://github.com/OpenLiberty/liberty-bikes-ai
 
 
 ## If you get stuck
+
 If you are stuck on a section and unable to make progress, please ask one of the lab admins for help.
 As a backup, we have tagged several checkpoints along the lab. If you get stuck and just want to skip to the next section, you can do the following:
-If you have registered your Bot key in `src/main/resources/META-INF/microprofile-config.properties` at this point, save it off to a file outside the lab repo
-Wipe away all of your current changes with `git checkout -- .`
-Check out the next checkpoint branch with `git checkout checkpoint-1` (or whatever checkpoint is next, checkpoint names are labelled in section headers)
-Restart your bot server by doing `./gradlew start`
+
+1. If you have registered your Bot key in `src/main/resources/META-INF/microprofile-config.properties` at this point, save it off to a file outside the lab repo
+2. Wipe away all of your current changes with `git checkout -- .`
+3. Check out the next checkpoint branch with `git checkout checkpoint-1` (or whatever checkpoint is next, checkpoint names are labelled in section headers)
+4. Restart your bot server by doing `./gradlew start`
 
 
 # 1) Your first game
 
-
 Before you start writing your AI service, let's begin by getting a basic understanding of what Liberty Bikes is on the surface and how it all works under the hood.
-
 
 ### How the game works:
 - The game consists of rounds that typically last 20-60 seconds each
@@ -93,14 +90,15 @@ The Liberty Bikes core services are comprised of 4 OpenLiberty servers, each run
 - player-service: Manages player registration and stats. (features used: CDI, JAX-RS, JSON-B, MP Config, JDBC)
 - auth-service: Coordinates authentication and distributes JWTs (JSON Web Tokens) for other services. Can be set up to integrate with Google, Twitter, and Github SSO providers, but that will not be covered in this lab.
 
+Liberty Bikes architecture:
+![Image of Liberty Bikes arch](src/images/lb-core-arch.png)
 
 To see technology highlights in the code, have a look at https://github.com/OpenLiberty/liberty-bikes#technologies-used, or just poke through the code (particularly in game-service and player-service).
 
 
 # 2) Hello World!
 
-
-NOTE: For the remainder of this lab (except for section 5) you can leave the core services running on your machine. From this point forward you will be developing an app that runs in the 'liberty-bikes-ai' github repo that you cloned in section 0.
+> NOTE: For the remainder of this lab (except for section 5) you can leave the core services running on your machine. From this point forward you will be developing an app that runs in the 'liberty-bikes-ai' github repo that you cloned in section 0.
 
 ## Import the project
 Using some sort of IDE (Eclipse, IntelliJ, or VS Code), import the 'liberty-bikes-ai' folder as an existing Gradle project.  Ensure that you have build automatically turned on, or remember to issue a rebuild of the project whenever you make a code change.
@@ -173,10 +171,10 @@ We can get the current party ID by invoking `GET http://<game-service-ip-port>/p
 Go to the `GameServiceClient` interface and add an interface method that represents the endpoint we want to invoke like so:
 
 ```java
-    @GET    
-    @Path("/party/describe")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, Object> describe();
+@GET    
+@Path("/party/describe")
+@Produces(MediaType.APPLICATION_JSON)
+public Map<String, Object> describe();
 ```
 
 If you are familiar with JAX-RS, you will notice that this is the exact same signature and annotations that a JAX-RS method would have, but without the method body.
@@ -184,53 +182,49 @@ Next, we need to declare the base URI of this REST client. We can do this using 
 
 ```java
 @Path("/")
-@Produces(MediaType.APPLICATION_JSON)
 @RegisterRestClient(baseUri = "http://localhost:8080", configKey = AIConfiguration.GAME_SERVICE_KEY)
 public interface GameServiceClient {
 ```
 
-When we run the game-service locally, it's URI is http://localhost:8080, so we will default to using that. The `configKey` attribute allows us to override the `baseUri` using MP Config, which we will do later on in section 5.
+When we run the game-service locally, its URI is http://localhost:8080, so we will default to using that with the `baseUri` attribute. The `configKey` attribute allows us to override the `baseUri` using MP Config, which we will do later on in section 5.
 
 
 Now that we have our REST Client bean, we can inject it into the `RegistrationBean` and get the current round id:
 
 ```java
-    // don't forget to add these 2 annotations!
-    @Inject
-    @RestClient
-    GameServiceClient gameService;
+// don't forget to add these 2 annotations!
+@Inject
+@RestClient
+GameServiceClient gameService;
 
+public void joinRound() {
+    System.out.println("Attempting to register with game service...");
 
-    public void joinRound() {
-        System.out.println("Attempting to register with game service...");
-
-
-        // TODO: use MPRestClient to pull the valid partyID from the game service
-        String partyId = (String) gameService.describe().get("partyId");
-        System.out.println("Found party id: " + partyId);
+    // TODO: use MPRestClient to pull the valid partyID from the game service
+    String partyId = (String) gameService.describe().get("partyId");
+    System.out.println("Found party id: " + partyId);
 ```
+
+The nice thing about MicroProfile REST Client is that you don't need to worry about building HTTP requests or parsing the responses back. It is all handled for you once you define the REST API schema and what the URLs are. In the above code, when we invoke `gameService.describe()` it is actually making an HTTP request to `{baseUri}/{path}` as defined by the `@RegisterRestClient.baseUri` and `@Path` annotation values, which evaluates to http://localhost:8080/party/describe. The REST Client interface methods can also take in arguments that are annotated with JAX-RS `@PathParam` or `@QueryParam` annotations to build more complex URLs. \
+When we invoke the `gameService.describe()` method, we get some JSON data back. MP Rest Client will also use JSON-B to automatically convert the JSON response to a Java class, in this case it converts from JSON --> `Map<String,Object>` for us, so we can directly call `Map.get(String key)` on the result.
 
 After building this change you should see that a 4-character code was received like this: `Found party id: WDPW`, followed by a NPE because we haven't implemented the subsequent code yet.
 
 
 ### Re-queueing with JAX-RS Server Sent Events
 
-
 Now that we know the party ID, we need to register our bot in the party queue. We can use JAX-RS Server Sent Events (SSE) to put ourselves into the queue for the party. Since only 4 people can play in a game at a time, this will ensure everyone waits their turn. By establishing an SSE request at `http://<game-service-ip-port>/party/{partyId}/queue?playerId={playerId}` the core services will put our bot in line for a game, and then asynchronously notify us when it's our turn to join a round.
-
 
 In order to make this request, we need to know 1 more piece of information: our Bot player's ID. To get this, we need to go to the frontend for the core services we want to register with. Right now, that's http://localhost:12000/ (later it will be one of the lab admins IP address). Click the "Register Bot" button, enter a name for your bot, and then click "Register Bot" again to get your bot player's ID. Copy and paste the ID string into `src/main/resources/META-INF/microprofile-config.properties` as the value for `player_key`.
 
-
 In the `AIConfiguration` class, add `@Inject` and `@ConfigProperty(name = "player_key")` to the `playerKey` field. This will cause the value from `microprofile-config.properties` to be injected into the field, which is nice because we don't need to add secret information to our codebase, and we can easily change or override the value later without needing to recompile or repackage the app later.
-
 
 We also need to add the game-service URL to the `AIConfiguration` class, add the following annotations to the `gameServiceUrl` field:
 
 ```java
-    @Inject
-    @ConfigProperty(name = GAME_SERVICE_KEY + "/mp-rest/url", defaultValue = "http://localhost:8080")
-    private String gameServiceUrl;
+@Inject
+@ConfigProperty(name = GAME_SERVICE_KEY + "/mp-rest/url", defaultValue = "http://localhost:8080")
+private String gameServiceUrl;
 ```
 
 To access the `AIConfiguration` from the `RegistrationBean`, add the `@Inject` annotation to the `RegistrationBean.config` field.
@@ -238,11 +232,11 @@ To access the `AIConfiguration` from the `RegistrationBean`, add the `@Inject` a
 Now that our player ID is configured, we can make the JAX-RS SSE request. Add the following code to the end of the `RegistrationBean.joinRound()` method:
 
 ```java
-        SseEventSource source = SseEventSource.target(target).build();  
-        source.register(inboundEvent -> processInboundEvent(inboundEvent, source),      
-                        errEvent -> errEvent.printStackTrace(), 
-                        () -> System.out.println("Closing SSE source for " + targetStr));       
-        source.open();
+SseEventSource source = SseEventSource.target(target).build();  
+source.register(inboundEvent -> processInboundEvent(inboundEvent, source),      
+                errEvent -> errEvent.printStackTrace(), 
+                () -> System.out.println("Closing SSE source for " + targetStr));       
+source.open();
 ```
 This code will make an HTTP request to the game-server with the URL discussed above. Here our AI Bot app is acting as the client to the SSE request, so it doesn't need to constantly poll the game-service to see what position in the queue it is -- the server will send the event when it wants to update clients. Most of the magic happens in the `SseEventSource.register()` method, which will set up callbacks for inbound events, error events, and the close event respectively.
 
@@ -307,26 +301,37 @@ Some other relevant aspects of JSON-B are:
 - By default, JSON-B only maps to public fields or getter/setter methods. Non-public members are ignored
 - By default, the java objects must have a default (no-args) constructor.
 
-Using this information, try to model the JSON data as POJOs in your app. 
-If you get stuck, there is more information at: http://json-b.net/docs/user-guide.html#default-mapping. 
+Using this information, try to model the JSON data as POJOs in your app. \
+If you get stuck, there is more information at: http://json-b.net/docs/user-guide.html#default-mapping \
 Or if you really get stuck, the answers can be found here: https://github.com/OpenLiberty/liberty-bikes-ai/tree/checkpoint-3/src/main/java/org/libertybikes/ai/model
 
 
-# 4) Code, Play, Repeat
+# 4) Code, Play, Repeat [checkpoint-3]
 
 Now that you've modeled your JSON data with Java objects, you can pass these objects to your `AILogic` and finally make some informed decisions on where to steer your bot! Be warned, there are a few different types of messages that the game-service will broadcast -- not all of them are game ticks! You will need to account for this when passing a `GameTick` to your `AILogic` class somehow:
 
 ```java
-            } else {
-                // use jsonb to convert from String --> POJO
-                GameTick gameTick = jsonb.fromJson(message, GameTick.class);
-                if (gameTick.isValid())
-                    sendDirection(aiLogic.processAiMove(gameTick));
-            }
+    } else {
+        // use jsonb to convert from String --> POJO
+        GameTick gameTick = jsonb.fromJson(message, GameTick.class);
+        if (gameTick.isValid())
+            sendDirection(aiLogic.processAiMove(gameTick));
+    }
 ```
 
 The `AILogic` class can house any of the... AI logic... that you want to use to control your bot. Feel free to create additional methods and classes at this point if it would be helpful -- this is essentially the end of the lab and you can do put as much or as little effort as you'd like into making your AI Bot. Perhaps think of some algorithms that you could use to steer your bot. For example, here are a few basic algorithms:
 - Go straight until you are about to run into something, then turn left or right (relative to bot's current direction)
 - At each game tick "look" in each direction -- forward, left, and right. Compute which direction you can go in a straight line for the longest, and go that way.
 
-# 5) WIP
+# 5) Let's Get Ready to Rumble!!!
+
+Towards the end of the lab we will host a competition where everyone can battle their AI bots against each other to see who has the best one! In order to do this, you will run just your AI bot on your laptop. You may now shutdown the core services running on your laptop by running `./gradlew stop` from the root of the liberty-bikes repo.
+
+The lab admins should be running a set of core services on their laptops, and will provde you with their IP address. We will call it `$ADMIN_IP` in these instructions.
+
+In order to configure your bot to connect to the lab admins set of core services, you must do the following:
+1. Go to their frontend at `http://$ADMIN_IP:8080 and register your bot and take note of the generated key like you did at the end of section 2
+2. Stop your bot server using `./gradlew stop`
+3. Put update `src/main/resources/META-INF/microprofile-config.properties` with your new bot key
+4. Also in the `microprofile-config.properties` file, uncomment the `GAME_SERVICE_URL/mp-rest/url` key, and update its value with `$ADMIN_IP`, for example `http://9.10.11.12:8080`
+5. Start your bot server using `./gradlew start`. You should see in your server logs that it is now connecting successfully to the lab admin's game-service instance.
