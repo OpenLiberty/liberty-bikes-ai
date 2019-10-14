@@ -55,7 +55,7 @@ public class AIWebSocket {
     // Every game tick, we recieve a message back listing each object on the game board and their location
     @OnMessage
     public void onMessage(Session session, String message) throws IOException {
-        System.out.println("got msg: " + message);
+        //System.out.println("got msg: " + message);
         try {
             if ("{\"gameStatus\":\"FINISHED\"}".equals(message)) {
                 // TODO: handle this more elegantly than .equals()
