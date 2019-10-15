@@ -70,17 +70,18 @@ public class AILogic {
             type = GAME_SLOT.PLAYER;
         else if (o instanceof MovingObstacle)
             type = GAME_SLOT.MOVING_OBSTACLE;
-        for (int w = 0; w < o.width; w++) {
-            for (int h = 0; h < o.height; h++) {
-                // Render the center slot of a 3x3 player as its trail
-                if (type == GAME_SLOT.PLAYER && w == 1 && h == 1)
-                    gameBoard[o.x + w][o.y + h] = GAME_SLOT.PLAYER_TRAIL;
-                else if (type == GAME_SLOT.PLAYER && gameBoard[o.x + w][o.y + h] == GAME_SLOT.PLAYER_TRAIL)
-                    ; // do nothing (don't overwrite player trails with player slots)
-                else
-                    gameBoard[o.x + w][o.y + h] = type;
-            }
-        }
+        // TODO: uncomment this code once you have implemented the JSON-B models in section 3
+//        for (int w = 0; w < o.width; w++) {
+//            for (int h = 0; h < o.height; h++) {
+//                // Render the center slot of a 3x3 player as its trail
+//                if (type == GAME_SLOT.PLAYER && w == 1 && h == 1)
+//                    gameBoard[o.x + w][o.y + h] = GAME_SLOT.PLAYER_TRAIL;
+//                else if (type == GAME_SLOT.PLAYER && gameBoard[o.x + w][o.y + h] == GAME_SLOT.PLAYER_TRAIL)
+//                    ; // do nothing (don't overwrite player trails with player slots)
+//                else
+//                    gameBoard[o.x + w][o.y + h] = type;
+//            }
+//        }
     }
 
     /**
