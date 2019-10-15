@@ -12,12 +12,8 @@ import javax.servlet.annotation.WebListener;
 @WebListener
 public class StartupProcedure implements ServletContextListener {
 
-    @Inject
-    RegistrationBean registration;
-
     @PostConstruct
     public void joinFirstRound() {
-        registration.joinRound();
+        System.out.println("Hello world!");
     }
-
 }
