@@ -62,17 +62,7 @@ public class AIWebSocket {
                 // game over, requeue
                 session.close();
                 registration.joinRound();
-            } else {
-                // use jsonb to convert from String --> POJO and more easily made decisions on where to move
-                GameTick gameTick = jsonb.fromJson(message, GameTick.class);
-                if (gameTick.isValid()) {
-                    DIRECTION newDirection = aiLogic.processAiMove(gameTick);
-                    if (newDirection != currentDirection) {
-                        currentDirection = newDirection;
-                        sendDirection(currentDirection);
-                    }
-                }
-            }
+            } 
         } catch (Exception e) {
             e.printStackTrace();
         }

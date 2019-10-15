@@ -46,14 +46,8 @@ public class AILogic {
     }
 
     private final GAME_SLOT[][] gameBoard = new GAME_SLOT[BOARD_SIZE][BOARD_SIZE];
-    private final String myPlayerId;
-    private boolean filledFixedObstacles = false;
-    private DIRECTION currentDirection = DIRECTION.RIGHT;
-    private int currentX;
-    private int currentY;
 
     public AILogic(String myId) {
-        myPlayerId = myId;
         for (int x = 0; x < BOARD_SIZE; x++)
             Arrays.fill(gameBoard[x], GAME_SLOT.OPEN);
     }
@@ -63,91 +57,7 @@ public class AILogic {
      * objects on the board, players and obstacles.
      */
     public DIRECTION processAiMove(GameTick gameTick) {
-        updateBoard(gameTick);
-
-        System.out.println("Currently facing: " + currentDirection);
-        DIRECTION bestDirection = currentDirection;
-        int bestDirectionSlots = 0;
-        for (DIRECTION d : DIRECTION.values()) {
-            int freeSlots = freeSlots(d);
-            if (freeSlots > bestDirectionSlots) {
-                bestDirection = d;
-                bestDirectionSlots = freeSlots;
-            }
-        }
-        currentDirection = bestDirection;
-        System.out.println("  will face: " + currentDirection);
-        return currentDirection;
-    }
-
-    /**
-     * @param lookingDirection The direction to count the number of free slots in
-     * @return The number of open game board slots between the player's current location
-     *         and the nearest obstacle in that direction
-     */
-    private int freeSlots(DIRECTION lookingDirection) {
-        int xIncrement = 0, yIncrement = 0;
-        if (lookingDirection == DIRECTION.LEFT) {
-            xIncrement = -1;
-            yIncrement = 0;
-        } else if (lookingDirection == DIRECTION.UP) {
-            xIncrement = 0;
-            yIncrement = -1;
-        } else if (lookingDirection == DIRECTION.RIGHT) {
-            xIncrement = 1;
-            yIncrement = 0;
-        } else { // down
-            xIncrement = 0;
-            yIncrement = 1;
-        }
-
-        int freeSlots = 0;
-        int x = this.currentX + (xIncrement * 2);
-        int y = this.currentY + (yIncrement * 2);
-        int xOffset = (lookingDirection == DIRECTION.UP || lookingDirection == DIRECTION.DOWN) ? 1 : 0;
-        int yOffset = xOffset == 0 ? 1 : 0;
-        while (x < BOARD_SIZE && y < BOARD_SIZE &&
-               x > 0 && y > 0 &&
-               // Since players are 3 slots wide, we need to look 3 slots wide
-               gameBoard[x][y] == GAME_SLOT.OPEN &&
-               gameBoard[x + xOffset][y + yOffset] == GAME_SLOT.OPEN &&
-               gameBoard[x + (-1 * xOffset)][y + (-1 * yOffset)] == GAME_SLOT.OPEN) {
-            freeSlots++;
-            x += xIncrement;
-            y += yIncrement;
-        }
-        System.out.println("  Found " + freeSlots + " free slots looking " + lookingDirection);
-        return freeSlots;
-    }
-
-    private void updateBoard(GameTick currentBoard) {
-        // Only fill static obstacles once
-        if (!filledFixedObstacles) {
-            for (Obstacle o : currentBoard.obstacles)
-                fill(o);
-            filledFixedObstacles = true;
-        }
-
-        // Erase moving obstacles and players each turn so they can be re-drawn
-        for (int x = 0; x < BOARD_SIZE; x++)
-            for (int y = 0; y < BOARD_SIZE; y++)
-                if (gameBoard[x][y] == GAME_SLOT.MOVING_OBSTACLE || gameBoard[x][y] == GAME_SLOT.PLAYER)
-                    gameBoard[x][y] = GAME_SLOT.OPEN;
-
-        // Re-draw moving obstacles
-        for (MovingObstacle o : currentBoard.movingObstacles)
-            fill(o);
-
-        // Re-draw players
-        for (Player p : currentBoard.players) {
-            fill(p);
-            if (myPlayerId.equals(p.id)) {
-                // Update my location
-                currentX = p.x + 1;
-                currentY = p.y + 1;
-            }
-        }
-        //printBoard();
+        return DIRECTION.RIGHT;
     }
 
     /**
