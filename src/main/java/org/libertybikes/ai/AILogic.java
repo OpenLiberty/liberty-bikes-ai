@@ -9,7 +9,7 @@ import org.libertybikes.ai.model.Player;
 
 /**
  * Represents the main logic of your custom Liberty Bikes AI. Every game tick AIWebSocket will
- * call processAIMove(String message) where the message represents the state of the game board
+ * call processAIMove(GameTick gameTick) where the message represents the state of the game board
  * at that time. Using this information you have to decide when to change your bike's direction.
  *
  * Helpful Information:
@@ -59,7 +59,7 @@ public class AILogic {
     }
 
     /*
-     * This should contain the main logic of the AI, it receives a JSON straing of all the
+     * This should contain the main logic of the AI, it receives a JSON string of all the
      * objects on the board, players and obstacles.
      */
     public DIRECTION processAiMove(GameTick gameTick) {
