@@ -58,7 +58,6 @@ public class AIWebSocket {
         //System.out.println("got msg: " + message);
         try {
             if ("{\"gameStatus\":\"FINISHED\"}".equals(message)) {
-                // TODO: handle this more elegantly than .equals()
                 // game over, requeue
                 session.close();
                 registration.joinRound();

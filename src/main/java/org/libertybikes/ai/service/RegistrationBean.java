@@ -36,6 +36,11 @@ public class RegistrationBean {
 
     public void joinRound() {
         System.out.println("Attempting to register with game service...");
+        
+        if (config == null) {
+    	  System.out.println("Injection for AIConfiguration not yet implemented!");
+    	  return;
+    	}
 
         String partyId = (String) gameService.describe().get("partyId");
         System.out.println("Found party id: " + partyId);
