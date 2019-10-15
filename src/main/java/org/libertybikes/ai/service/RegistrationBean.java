@@ -27,18 +27,15 @@ public class RegistrationBean {
 
     private static final Jsonb jsonb = JsonbBuilder.create();
 
-    @Inject
     AIConfiguration config;
 
-    @Inject
-    @RestClient
     GameServiceClient gameService;
 
     public void joinRound() {
         System.out.println("Attempting to register with game service...");
 
-        String partyId = (String) gameService.describe().get("partyId");
-        System.out.println("Found party id: " + partyId);
+        // TODO: use MPRestClient to pull the valid partyID from the game service
+        String partyId = "";
 
         if (config == null) {
     	  System.out.println("Injection for AIConfiguration not yet implemented!");
@@ -51,11 +48,6 @@ public class RegistrationBean {
         System.out.println("Establishing SSE target at: " + targetStr);
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(targetStr);
-        SseEventSource source = SseEventSource.target(target).build();
-        source.register(inboundEvent -> processInboundEvent(inboundEvent, source),
-                        errEvent -> errEvent.printStackTrace(),
-                        () -> System.out.println("Closing SSE source for " + targetStr));
-        source.open();
         // intentionally "leak" the source, it will be closed in processInboundEvent() when the proper event is received
     }
 
