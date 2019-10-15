@@ -16,10 +16,5 @@ public class Obstacle {
     // Sample data:
     // {"height":10,"width":2,"x":48,"y":10}
 
-    public int height;
-    public int width;
-    public int x;
-    public int y;
-
     public static class MovingObstacle extends Obstacle {}
 }
