@@ -24,9 +24,4 @@ public class Player extends Obstacle {
     // {"id":"1KGV-RS2Y-66NJ-9I8M","name":"Bill","color":"#ABD155",
     //   "status":"Dead","alive":false,"x":68,"y":12,"width":3,
     //   "height":3,"direction":"RIGHT"}
-
-    public String id;
-    public String status;
-    public boolean alive;
-    public DIRECTION direction;
 }

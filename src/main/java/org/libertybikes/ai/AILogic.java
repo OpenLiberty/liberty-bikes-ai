@@ -109,31 +109,32 @@ public class AILogic {
 
     private void updateBoard(GameTick currentBoard) {
         // Only fill static obstacles once
-        if (!filledFixedObstacles) {
-            for (Obstacle o : currentBoard.obstacles)
-                fill(o);
-            filledFixedObstacles = true;
-        }
-
-        // Erase moving obstacles and players each turn so they can be re-drawn
-        for (int x = 0; x < BOARD_SIZE; x++)
-            for (int y = 0; y < BOARD_SIZE; y++)
-                if (gameBoard[x][y] == GAME_SLOT.MOVING_OBSTACLE || gameBoard[x][y] == GAME_SLOT.PLAYER)
-                    gameBoard[x][y] = GAME_SLOT.OPEN;
-
-        // Re-draw moving obstacles
-        for (MovingObstacle o : currentBoard.movingObstacles)
-            fill(o);
-
-        // Re-draw players
-        for (Player p : currentBoard.players) {
-            fill(p);
-            if (myPlayerId.equals(p.id)) {
-                // Update my location
-                currentX = p.x + 1;
-                currentY = p.y + 1;
-            }
-        }
+    	// TODO: uncomment this code once you have implemented the JSON-B models in section 3
+//        if (!filledFixedObstacles) {
+//            for (Obstacle o : currentBoard.obstacles)
+//                fill(o);
+//            filledFixedObstacles = true;
+//        }
+//
+//        // Erase moving obstacles and players each turn so they can be re-drawn
+//        for (int x = 0; x < BOARD_SIZE; x++)
+//            for (int y = 0; y < BOARD_SIZE; y++)
+//                if (gameBoard[x][y] == GAME_SLOT.MOVING_OBSTACLE || gameBoard[x][y] == GAME_SLOT.PLAYER)
+//                    gameBoard[x][y] = GAME_SLOT.OPEN;
+//
+//        // Re-draw moving obstacles
+//        for (MovingObstacle o : currentBoard.movingObstacles)
+//            fill(o);
+//
+//        // Re-draw players
+//        for (Player p : currentBoard.players) {
+//            fill(p);
+//            if (myPlayerId.equals(p.id)) {
+//                // Update my location
+//                currentX = p.x + 1;
+//                currentY = p.y + 1;
+//            }
+//        }
         //printBoard();
     }
 
@@ -147,17 +148,18 @@ public class AILogic {
             type = GAME_SLOT.PLAYER;
         else if (o instanceof MovingObstacle)
             type = GAME_SLOT.MOVING_OBSTACLE;
-        for (int w = 0; w < o.width; w++) {
-            for (int h = 0; h < o.height; h++) {
-                // Render the center slot of a 3x3 player as its trail
-                if (type == GAME_SLOT.PLAYER && w == 1 && h == 1)
-                    gameBoard[o.x + w][o.y + h] = GAME_SLOT.PLAYER_TRAIL;
-                else if (type == GAME_SLOT.PLAYER && gameBoard[o.x + w][o.y + h] == GAME_SLOT.PLAYER_TRAIL)
-                    ; // do nothing (don't overwrite player trails with player slots)
-                else
-                    gameBoard[o.x + w][o.y + h] = type;
-            }
-        }
+        // TODO: uncomment this code once you have implemented the JSON-B models in section 3
+//        for (int w = 0; w < o.width; w++) {
+//            for (int h = 0; h < o.height; h++) {
+//                // Render the center slot of a 3x3 player as its trail
+//                if (type == GAME_SLOT.PLAYER && w == 1 && h == 1)
+//                    gameBoard[o.x + w][o.y + h] = GAME_SLOT.PLAYER_TRAIL;
+//                else if (type == GAME_SLOT.PLAYER && gameBoard[o.x + w][o.y + h] == GAME_SLOT.PLAYER_TRAIL)
+//                    ; // do nothing (don't overwrite player trails with player slots)
+//                else
+//                    gameBoard[o.x + w][o.y + h] = type;
+//            }
+//        }
     }
 
     /**
