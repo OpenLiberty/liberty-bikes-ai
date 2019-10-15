@@ -4,7 +4,6 @@ import java.net.URI;
 import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.annotation.JsonbProperty;
@@ -15,7 +14,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.sse.InboundSseEvent;
 import javax.ws.rs.sse.SseEventSource;
 
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.ai.restclient.GameServiceClient;
 
 /**
@@ -27,18 +25,15 @@ public class RegistrationBean {
 
     private static final Jsonb jsonb = JsonbBuilder.create();
 
-    @Inject
     AIConfiguration config;
 
-    @Inject
-    @RestClient
     GameServiceClient gameService;
 
     public void joinRound() {
         System.out.println("Attempting to register with game service...");
 
-        String partyId = (String) gameService.describe().get("partyId");
-        System.out.println("Found party id: " + partyId);
+        // TODO: use MPRestClient to pull the valid partyID from the game service
+        String partyId = "";
 
         // MP Rest Client doesn't yet support JAX-RS server-sent-events, so we nee to do this manually
         // enhancement tracked at: https://github.com/eclipse/microprofile-rest-client/issues/11
@@ -46,11 +41,6 @@ public class RegistrationBean {
         System.out.println("Establishing SSE target at: " + targetStr);
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(targetStr);
-        SseEventSource source = SseEventSource.target(target).build();
-        source.register(inboundEvent -> processInboundEvent(inboundEvent, source),
-                        errEvent -> errEvent.printStackTrace(),
-                        () -> System.out.println("Closing SSE source for " + targetStr));
-        source.open();
         // intentionally "leak" the source, it will be closed in processInboundEvent() when the proper event is received
     }
 
