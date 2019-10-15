@@ -41,7 +41,8 @@ public class AILogic {
         OPEN,
         FIXED_OBSTACLE,
         MOVING_OBSTACLE,
-        PLAYER
+        PLAYER,
+        PLAYER_TRAIL
     }
 
     private final GAME_SLOT[][] gameBoard = new GAME_SLOT[BOARD_SIZE][BOARD_SIZE];
@@ -79,6 +80,11 @@ public class AILogic {
         return currentDirection;
     }
 
+    /**
+     * @param lookingDirection The direction to count the number of free slots in
+     * @return The number of open game board slots between the player's current location
+     *         and the nearest obstacle in that direction
+     */
     private int freeSlots(DIRECTION lookingDirection) {
         int xIncrement = 0, yIncrement = 0;
         if (lookingDirection == DIRECTION.LEFT) {
@@ -98,11 +104,14 @@ public class AILogic {
         int freeSlots = 0;
         int x = this.currentX + (xIncrement * 2);
         int y = this.currentY + (yIncrement * 2);
-        // TODO: Should be looking 3 slots wide in each direction
-        // rather than just 1 slot wide in each direction
+        int xOffset = (lookingDirection == DIRECTION.UP || lookingDirection == DIRECTION.DOWN) ? 1 : 0;
+        int yOffset = xOffset == 0 ? 1 : 0;
         while (x < BOARD_SIZE && y < BOARD_SIZE &&
                x > 0 && y > 0 &&
-               gameBoard[x][y] == GAME_SLOT.OPEN) {
+               // Since players are 3 slots wide, we need to look 3 slots wide
+               gameBoard[x][y] == GAME_SLOT.OPEN &&
+               gameBoard[x + xOffset][y + yOffset] == GAME_SLOT.OPEN &&
+               gameBoard[x + (-1 * xOffset)][y + (-1 * yOffset)] == GAME_SLOT.OPEN) {
             freeSlots++;
             x += xIncrement;
             y += yIncrement;
@@ -119,16 +128,17 @@ public class AILogic {
             filledFixedObstacles = true;
         }
 
-        // Erase and re-fill moving obstacles each turn
+        // Erase moving obstacles and players each turn so they can be re-drawn
         for (int x = 0; x < BOARD_SIZE; x++)
             for (int y = 0; y < BOARD_SIZE; y++)
-                if (gameBoard[x][y] == GAME_SLOT.MOVING_OBSTACLE)
+                if (gameBoard[x][y] == GAME_SLOT.MOVING_OBSTACLE || gameBoard[x][y] == GAME_SLOT.PLAYER)
                     gameBoard[x][y] = GAME_SLOT.OPEN;
+
+        // Re-draw moving obstacles
         for (MovingObstacle o : currentBoard.movingObstacles)
             fill(o);
 
-        // Fill players each turn
-        // TODO: Should erase part of player trails so they only leave a trail 1 slot wide
+        // Re-draw players
         for (Player p : currentBoard.players) {
             fill(p);
             if (myPlayerId.equals(p.id)) {
@@ -140,6 +150,10 @@ public class AILogic {
         //printBoard();
     }
 
+    /**
+     * Fills the {@code gameBoard} 2d array with the corresponding spaces occupied
+     * by the supplied Obstacle
+     */
     private void fill(Obstacle o) {
         GAME_SLOT type = GAME_SLOT.FIXED_OBSTACLE;
         if (o instanceof Player)
@@ -148,11 +162,26 @@ public class AILogic {
             type = GAME_SLOT.MOVING_OBSTACLE;
         for (int w = 0; w < o.width; w++) {
             for (int h = 0; h < o.height; h++) {
-                gameBoard[o.x + w][o.y + h] = type;
+                // Render the center slot of a 3x3 player as its trail
+                if (type == GAME_SLOT.PLAYER && w == 1 && h == 1)
+                    gameBoard[o.x + w][o.y + h] = GAME_SLOT.PLAYER_TRAIL;
+                else if (type == GAME_SLOT.PLAYER && gameBoard[o.x + w][o.y + h] == GAME_SLOT.PLAYER_TRAIL)
+                    ; // do nothing (don't overwrite player trails with player slots)
+                else
+                    gameBoard[o.x + w][o.y + h] = type;
             }
         }
     }
 
+    /**
+     * Prints a textual representation of {@code gameBoard} 2d array to System.out
+     * a '#' char represents a fixed obstacle
+     * a '*' char represents a moving ostacle
+     * a 'X' char represents a player
+     * a 'x' char represents a player's trail
+     * Since this method prints 120 lines of output, it would be good to only use this
+     * for debugging purposes.
+     */
     private void printBoard() {
         StringBuilder sb = new StringBuilder(BOARD_SIZE * BOARD_SIZE + BOARD_SIZE + 1);
         sb.append('\n');
@@ -164,12 +193,23 @@ public class AILogic {
             for (int x = 0; x < BOARD_SIZE; x++) {
                 char c = ' ';
                 GAME_SLOT slot = gameBoard[x][y];
-                if (slot == GAME_SLOT.FIXED_OBSTACLE)
-                    c = '#';
-                else if (slot == GAME_SLOT.MOVING_OBSTACLE)
-                    c = '*';
-                else if (slot == GAME_SLOT.PLAYER)
-                    c = 'X';
+                switch (slot) {
+                    case FIXED_OBSTACLE:
+                        c = '#';
+                        break;
+                    case MOVING_OBSTACLE:
+                        c = '*';
+                        break;
+                    case PLAYER:
+                        c = 'X';
+                        break;
+                    case PLAYER_TRAIL:
+                        c = 'x';
+                    case OPEN:
+                        break; // leave blank
+                    default:
+                        throw new IllegalArgumentException("Unknown slot type: " + slot);
+                }
                 sb.append(c);
             }
             sb.append("|\n");
