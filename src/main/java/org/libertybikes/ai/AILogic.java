@@ -64,19 +64,6 @@ public class AILogic {
      */
     public DIRECTION processAiMove(GameTick gameTick) {
         updateBoard(gameTick);
-
-        System.out.println("Currently facing: " + currentDirection);
-        DIRECTION bestDirection = currentDirection;
-        int bestDirectionSlots = 0;
-        for (DIRECTION d : DIRECTION.values()) {
-            int freeSlots = freeSlots(d);
-            if (freeSlots > bestDirectionSlots) {
-                bestDirection = d;
-                bestDirectionSlots = freeSlots;
-            }
-        }
-        currentDirection = bestDirection;
-        System.out.println("  will face: " + currentDirection);
         return currentDirection;
     }
 
