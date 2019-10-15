@@ -36,16 +36,16 @@ public class RegistrationBean {
 
     public void joinRound() {
         System.out.println("Attempting to register with game service...");
-        
-        if (config == null) {
-    	  System.out.println("Injection for AIConfiguration not yet implemented!");
-    	  return;
-    	}
 
         String partyId = (String) gameService.describe().get("partyId");
         System.out.println("Found party id: " + partyId);
 
-        // MP Rest Client doesn't yet support JAX-RS server-sent-events, so we nee to do this manually
+        if (config == null) {
+    	  System.out.println("Injection for AIConfiguration not yet implemented!");
+    	  return;
+    	}
+        
+        // MP Rest Client doesn't yet support JAX-RS server-sent-events, so we need to do this manually
         // enhancement tracked at: https://github.com/eclipse/microprofile-rest-client/issues/11
         String targetStr = config.getGameServiceHttp() + "/party/" + partyId + "/queue?playerId=" + config.getPlayerId();
         System.out.println("Establishing SSE target at: " + targetStr);
