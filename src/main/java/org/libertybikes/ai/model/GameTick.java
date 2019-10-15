@@ -28,12 +28,4 @@ public class GameTick {
     //     etc...
     //   ]
     // }
-
-    public List<Obstacle> obstacles;
-    public List<MovingObstacle> movingObstacles;
-    public List<Player> players;
-
-    public boolean isValid() {
-        return obstacles != null && movingObstacles != null && players != null;
-    }
 }
